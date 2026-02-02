@@ -1,10 +1,10 @@
-package com.example.budongscheduler;
+package com.example.budongbatch;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class BudongSchedulerApplicationTests {
+class BudongBatchApplicationTests {
 
     @Test
     void contextLoads() {

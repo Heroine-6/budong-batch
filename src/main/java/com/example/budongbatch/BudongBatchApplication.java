@@ -1,13 +1,13 @@
-package com.example.budongscheduler;
+package com.example.budongbatch;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class BudongSchedulerApplication {
+public class BudongBatchApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(BudongSchedulerApplication.class, args);
+        SpringApplication.run(BudongBatchApplication.class, args);
     }
 
 }
