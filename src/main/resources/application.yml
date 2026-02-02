@@ -1,0 +1,58 @@
+spring:
+  application:
+    name: budong-batch
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: always
+
+  config:
+    import: optional:file:.env[.properties]
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  elasticsearch:
+    uris: ${ELASTIC_SEARCH}
+
+external:
+  api:
+    service-key: ${API_SERVICE_KEY}
+
+naver:
+  map:
+    client-id: ${NAVER_MAP_CLIENT_ID}
+    client-secret: ${NAVER_MAP_CLIENT_SECRET}
+
+kakao:
+  map:
+    rest-api-key: ${KAKAO_MAP_REST_API_KEY}
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY:}
+      secret-key: ${AWS_SECRET_KEY:}
+    region:
+      static: ${AWS_REGION:ap-northeast-2}
+
+logging:
+  level:
+    org.springframework.data.elasticsearch.client.WIRE: TRACE
+    org.springframework.data.elasticsearch: DEBUG
+    tracer: TRACE
