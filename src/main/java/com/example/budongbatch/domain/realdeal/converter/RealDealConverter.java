@@ -3,6 +3,7 @@ package com.example.budongbatch.domain.realdeal.converter;
 import com.example.budongbatch.common.enums.PropertyType;
 import com.example.budongbatch.domain.realdeal.client.publicdata.AptItem;
 import com.example.budongbatch.domain.realdeal.entity.RealDeal;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -16,6 +17,7 @@ import java.time.LocalDate;
  * - 테스트 용이성: 변환 로직을 독립적으로 단위 테스트 가능 (외부 의존성 없음)
  * - 재사용성: 다른 곳에서 동일한 변환 로직 필요 시 재사용 가능
  */
+@Slf4j
 @Component
 public class RealDealConverter {
 
@@ -33,12 +35,18 @@ public class RealDealConverter {
         LocalDate dealDate = item.getDealDate();
 
         // 필수 데이터 검증
-        if (name == null || dealDate == null) {
+        if (name == null) {
+            log.debug("변환 스킵 - 이름 없음: lawdCd={}", lawdCd);
+            return null;
+        }
+        if (dealDate == null) {
+            log.debug("변환 스킵 - 거래일자 없음: name={}, lawdCd={}", name, lawdCd);
             return null;
         }
 
         BigDecimal dealAmount = parseDealAmount(item.dealAmount());
         if (dealAmount == null) {
+            log.debug("변환 스킵 - 거래금액 파싱 실패: name={}, dealAmount={}", name, item.dealAmount());
             return null;
         }
 
