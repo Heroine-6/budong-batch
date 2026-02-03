@@ -103,6 +103,8 @@ public class CollectTasklet implements Tasklet {
                 (lc, ym, page) -> villaClient.getVilla(serviceKey, lc, ym, page, NUM_OF_ROWS));
     }
 
+    // 공공데이터 API 페이징 수집 로직
+    // 네트워크 오류/5xx/429 등 일시적 장애는 Feign Retry 설정을 통해 재시도한다.
     private List<RealDeal> collectFromApi(String lawdCd, String dealYmd, String addressPrefix,
                                           PropertyType propertyType, ApiCaller apiCaller) {
         List<RealDeal> deals = new ArrayList<>();
@@ -133,6 +135,7 @@ public class CollectTasklet implements Tasklet {
         return deals;
     }
 
+    // Apt/Offi/Villa 3개 클라이언트 호출 로직이 동일한데, 클라이언트만 다르게 넘기려고 만듦
     @FunctionalInterface
     interface ApiCaller {
         AptResponse call(String lawdCd, String dealYmd, int pageNo);
