@@ -28,14 +28,10 @@ import java.util.List;
 /**
  * 실거래가 데이터 수집 Tasklet
  *
- * 역할
  * 전국 법정동 코드 순회
  * 공공데이터 API 호출 (아파트/오피스텔/빌라)
  * 수집 데이터 DB 저장 (중복 무시)
- *
- * Tasklet 방식 선택: 외부 API 호출은 청크 단위 처리보다 한 번에 수집 후 저장이 적합
  * 변환 로직 분리: RealDealConverter로 분리하여 테스트 용이성 확보
- * 중복 처리: DB 유니크 제약 활용, DataIntegrityViolationException 무시
  */
 @Slf4j
 @Component
