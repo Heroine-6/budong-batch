@@ -3,13 +3,13 @@ package com.example.budongbatch.domain.realdeal.converter;
 import com.example.budongbatch.common.enums.PropertyType;
 import com.example.budongbatch.domain.realdeal.client.publicdata.AptItem;
 import com.example.budongbatch.domain.realdeal.entity.RealDeal;
+import com.example.budongbatch.fixture.AptItemFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.time.Year;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,6 +22,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * - 전용면적 파싱
  */
 class RealDealConverterTest {
+
+    private static final String LAWD_CD = "11680";
+    private static final String ADDRESS_PREFIX = "서울특별시 강남구";
 
     private RealDealConverter converter;
 
@@ -38,25 +41,10 @@ class RealDealConverterTest {
         @DisplayName("정상 데이터 변환 성공")
         void convert_success() {
             // given
-            AptItem item = new AptItem(
-                    "래미안아파트",  // aptNm
-                    null,            // mhouseNm
-                    null,            // offiNm
-                    "12,500",        // dealAmount (만원)
-                    "84.99",         // excluUseAr
-                    Year.of(2020),   // buildYear
-                    2025,            // dealYear
-                    1,               // dealMonth
-                    15,              // dealDay
-                    "역삼동",         // umdNm
-                    "123-45",        // jibun
-                    10               // floor
-            );
-            String lawdCd = "11680";
-            String addressPrefix = "서울특별시 강남구";
+            AptItem item = AptItemFixture.create();
 
             // when
-            RealDeal result = converter.convert(item, lawdCd, PropertyType.APARTMENT, addressPrefix);
+            RealDeal result = converter.convert(item, LAWD_CD, PropertyType.APARTMENT, ADDRESS_PREFIX);
 
             // then
             assertThat(result).isNotNull();
@@ -67,21 +55,17 @@ class RealDealConverterTest {
             assertThat(result.getFloor()).isEqualTo(10);
             assertThat(result.getBuiltYear()).isEqualTo(2020);
             assertThat(result.getPropertyType()).isEqualTo(PropertyType.APARTMENT);
-            assertThat(result.getLawdCd()).isEqualTo("11680");
+            assertThat(result.getLawdCd()).isEqualTo(LAWD_CD);
         }
 
         @Test
         @DisplayName("이름이 null이면 null 반환")
         void convert_nullName_returnsNull() {
             // given
-            AptItem item = new AptItem(
-                    null, null, null,  // 모든 이름 필드 null
-                    "12,500", "84.99", Year.of(2020),
-                    2025, 1, 15, "역삼동", "123-45", 10
-            );
+            AptItem item = AptItemFixture.withNullName();
 
             // when
-            RealDeal result = converter.convert(item, "11680", PropertyType.APARTMENT, "서울특별시 강남구");
+            RealDeal result = converter.convert(item, LAWD_CD, PropertyType.APARTMENT, ADDRESS_PREFIX);
 
             // then
             assertThat(result).isNull();
@@ -91,15 +75,10 @@ class RealDealConverterTest {
         @DisplayName("거래일자가 null이면 null 반환")
         void convert_nullDealDate_returnsNull() {
             // given
-            AptItem item = new AptItem(
-                    "래미안아파트", null, null,
-                    "12,500", "84.99", Year.of(2020),
-                    null, null, null,  // 날짜 필드 null
-                    "역삼동", "123-45", 10
-            );
+            AptItem item = AptItemFixture.withNullDealDate();
 
             // when
-            RealDeal result = converter.convert(item, "11680", PropertyType.APARTMENT, "서울특별시 강남구");
+            RealDeal result = converter.convert(item, LAWD_CD, PropertyType.APARTMENT, ADDRESS_PREFIX);
 
             // then
             assertThat(result).isNull();
@@ -109,15 +88,10 @@ class RealDealConverterTest {
         @DisplayName("거래금액 파싱 실패 시 null 반환")
         void convert_invalidDealAmount_returnsNull() {
             // given
-            AptItem item = new AptItem(
-                    "래미안아파트", null, null,
-                    "invalid",  // 파싱 불가능한 금액
-                    "84.99", Year.of(2020),
-                    2025, 1, 15, "역삼동", "123-45", 10
-            );
+            AptItem item = AptItemFixture.withInvalidDealAmount();
 
             // when
-            RealDeal result = converter.convert(item, "11680", PropertyType.APARTMENT, "서울특별시 강남구");
+            RealDeal result = converter.convert(item, LAWD_CD, PropertyType.APARTMENT, ADDRESS_PREFIX);
 
             // then
             assertThat(result).isNull();
