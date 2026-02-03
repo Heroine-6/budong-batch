@@ -156,6 +156,8 @@ public class CollectTasklet implements Tasklet {
                 saved++;
             } catch (DataIntegrityViolationException e) {
                 // 중복 데이터 무시 (유니크 제약 위반)
+                log.debug("저장 스킵 - 중복 데이터: name={}, dealDate={}, error={}",
+                        deal.getPropertyName(), deal.getDealDate(), e.getMessage());
             }
         }
         return saved;
