@@ -77,10 +77,11 @@ public class CollectTasklet implements Tasklet {
 
     private int collectByLawdCd(String lawdCd, String dealYmd) {
         List<RealDeal> allDeals = new ArrayList<>();
+        String addressPrefix = lawdCodeService.getAddressPrefixFromLawdCd(lawdCd).orElse("");
 
-        allDeals.addAll(collectApt(lawdCd, dealYmd));
-        allDeals.addAll(collectOffi(lawdCd, dealYmd));
-        allDeals.addAll(collectVilla(lawdCd, dealYmd));
+        allDeals.addAll(collectApt(lawdCd, dealYmd, addressPrefix));
+        allDeals.addAll(collectOffi(lawdCd, dealYmd, addressPrefix));
+        allDeals.addAll(collectVilla(lawdCd, dealYmd, addressPrefix));
 
         int saved = saveDeals(allDeals);
 
@@ -91,23 +92,23 @@ public class CollectTasklet implements Tasklet {
         return allDeals.size();
     }
 
-    private List<RealDeal> collectApt(String lawdCd, String dealYmd) {
-        return collectFromApi(lawdCd, dealYmd, PropertyType.APARTMENT,
+    private List<RealDeal> collectApt(String lawdCd, String dealYmd, String addressPrefix) {
+        return collectFromApi(lawdCd, dealYmd, addressPrefix, PropertyType.APARTMENT,
                 (lc, ym, page) -> aptClient.getApt(serviceKey, lc, ym, page, NUM_OF_ROWS));
     }
 
-    private List<RealDeal> collectOffi(String lawdCd, String dealYmd) {
-        return collectFromApi(lawdCd, dealYmd, PropertyType.OFFICETEL,
+    private List<RealDeal> collectOffi(String lawdCd, String dealYmd, String addressPrefix) {
+        return collectFromApi(lawdCd, dealYmd, addressPrefix, PropertyType.OFFICETEL,
                 (lc, ym, page) -> offiClient.getOffi(serviceKey, lc, ym, page, NUM_OF_ROWS));
     }
 
-    private List<RealDeal> collectVilla(String lawdCd, String dealYmd) {
-        return collectFromApi(lawdCd, dealYmd, PropertyType.VILLA,
+    private List<RealDeal> collectVilla(String lawdCd, String dealYmd, String addressPrefix) {
+        return collectFromApi(lawdCd, dealYmd, addressPrefix, PropertyType.VILLA,
                 (lc, ym, page) -> villaClient.getVilla(serviceKey, lc, ym, page, NUM_OF_ROWS));
     }
 
-    private List<RealDeal> collectFromApi(String lawdCd, String dealYmd, PropertyType propertyType,
-                                          ApiCaller apiCaller) {
+    private List<RealDeal> collectFromApi(String lawdCd, String dealYmd, String addressPrefix,
+                                          PropertyType propertyType, ApiCaller apiCaller) {
         List<RealDeal> deals = new ArrayList<>();
         int pageNo = 1;
 
@@ -119,7 +120,7 @@ public class CollectTasklet implements Tasklet {
                 if (items.isEmpty()) break;
 
                 for (AptItem item : items) {
-                    RealDeal deal = realDealConverter.convert(item, lawdCd, propertyType);
+                    RealDeal deal = realDealConverter.convert(item, lawdCd, propertyType, addressPrefix);
                     if (deal != null) {
                         deals.add(deal);
                     }

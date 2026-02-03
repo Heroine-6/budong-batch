@@ -3,8 +3,6 @@ package com.example.budongbatch.domain.realdeal.converter;
 import com.example.budongbatch.common.enums.PropertyType;
 import com.example.budongbatch.domain.realdeal.client.publicdata.AptItem;
 import com.example.budongbatch.domain.realdeal.entity.RealDeal;
-import com.example.budongbatch.domain.realdeal.service.LawdCodeService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -15,14 +13,11 @@ import java.time.LocalDate;
  *
  * 분리 이유
  * - 단일 책임 원칙(SRP): Tasklet은 배치 흐름 제어만, 변환 로직은 Converter가 담당
- * - 테스트 용이성: 변환 로직을 독립적으로 단위 테스트 가능
+ * - 테스트 용이성: 변환 로직을 독립적으로 단위 테스트 가능 (외부 의존성 없음)
  * - 재사용성: 다른 곳에서 동일한 변환 로직 필요 시 재사용 가능
  */
 @Component
-@RequiredArgsConstructor
 public class RealDealConverter {
-
-    private final LawdCodeService lawdCodeService;
 
     /**
      * API 응답 아이템을 RealDeal 엔티티로 변환
@@ -30,9 +25,10 @@ public class RealDealConverter {
      * @param item API 응답 아이템
      * @param lawdCd 법정동 코드 (5자리)
      * @param propertyType 매물 유형 (APARTMENT, OFFICETEL, VILLA)
+     * @param addressPrefix 시도 + 시군구 (예: "서울특별시 강남구")
      * @return 변환된 RealDeal 엔티티, 필수 데이터 누락 시 null
      */
-    public RealDeal convert(AptItem item, String lawdCd, PropertyType propertyType) {
+    public RealDeal convert(AptItem item, String lawdCd, PropertyType propertyType, String addressPrefix) {
         String name = item.getName();
         LocalDate dealDate = item.getDealDate();
 
@@ -46,7 +42,6 @@ public class RealDealConverter {
             return null;
         }
 
-        String addressPrefix = lawdCodeService.getAddressPrefixFromLawdCd(lawdCd).orElse("");
         String address = buildAddress(addressPrefix, item.umdNm(), item.jibun());
 
         BigDecimal exclusiveArea = parseExclusiveArea(item.excluUseAr());
