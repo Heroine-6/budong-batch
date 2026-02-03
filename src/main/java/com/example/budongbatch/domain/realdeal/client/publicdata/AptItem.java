@@ -13,6 +13,9 @@ public record AptItem(
         @JsonProperty("dealAmount") String dealAmount,
         @JsonProperty("excluUseAr") String excluUseAr,
         @JsonProperty("buildYear") Year buildYear,
+        @JsonProperty("dealYear") Integer dealYear,
+        @JsonProperty("dealMonth") Integer dealMonth,
+        @JsonProperty("dealDay") Integer dealDay,
         @JsonProperty("umdNm") String umdNm,
         @JsonProperty("jibun") String jibun,
         @JsonProperty("floor") Integer floor
@@ -23,5 +26,11 @@ public record AptItem(
         if (mhouseNm != null) return mhouseNm;
         if (offiNm != null) return offiNm;
         return null;
+    }
+
+    // 거래일자 생성
+    public java.time.LocalDate getDealDate() {
+        if (dealYear == null || dealMonth == null || dealDay == null) return null;
+        return java.time.LocalDate.of(dealYear, dealMonth, dealDay);
     }
 }
