@@ -9,6 +9,8 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+
 /**
  * 실거래가 파이프라인 스케줄러
  *
@@ -26,7 +28,7 @@ public class DealPipelineJobScheduler {
     public void runDealPipelineJob() {
         try {
             JobParameters jobParameters = new JobParametersBuilder()
-                    .addLong("timestamp", System.currentTimeMillis())
+                    .addString("runDate", LocalDate.now().toString())
                     .toJobParameters();
 
             log.info("실거래가 파이프라인 Job 시작");
