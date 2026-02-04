@@ -54,6 +54,7 @@ public class RealDealFixture {
                 new BigDecimal("127.0396597"),
                 "서울특별시 강남구 역삼로 123"
         );
+        setField(deal, "id", 1L);
         return deal;
     }
 
