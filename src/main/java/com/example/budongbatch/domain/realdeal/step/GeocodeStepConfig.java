@@ -69,6 +69,7 @@ public class GeocodeStepConfig {
     /**
      * Step 시작/종료 리스너
      */
+    @Slf4j
     private static class GeocodeStepListener implements org.springframework.batch.core.StepExecutionListener {
         @Override
         public void beforeStep(org.springframework.batch.core.StepExecution stepExecution) {
