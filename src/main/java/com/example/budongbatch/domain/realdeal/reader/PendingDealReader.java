@@ -27,7 +27,6 @@ public class PendingDealReader implements ItemReader<RealDeal> {
     private static final int MAX_RETRY = 3;
 
     private Iterator<RealDeal> currentIterator;
-    private int currentPage = 0;
     private boolean pendingExhausted = false;
 
     @Override
