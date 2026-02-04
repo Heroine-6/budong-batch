@@ -3,7 +3,6 @@ package com.example.budongbatch.domain.realdeal.step;
 import com.example.budongbatch.domain.realdeal.entity.RealDeal;
 import com.example.budongbatch.domain.realdeal.processor.GeocodeProcessor;
 import com.example.budongbatch.domain.realdeal.reader.PendingDealReader;
-import feign.FeignException;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +24,8 @@ import org.springframework.transaction.PlatformTransactionManager;
  * Writer: JPA 업데이트
  *
  * Retry/Skip 전략:
- * - retryLimit: 3 (FeignException)
- * - skipLimit: 100 (지오코딩 실패 건)
+ * - 처리 실패는 Processor에서 상태로 관리 (RETRY/FAILED)
+ * - 배치 레벨 retry/skip 미사용
  */
 @Slf4j
 @Configuration
@@ -40,9 +39,6 @@ public class GeocodeStepConfig {
     private final GeocodeProcessor geocodeProcessor;
 
     private static final int CHUNK_SIZE = 100;
-    private static final int RETRY_LIMIT = 3;
-    private static final int SKIP_LIMIT = 100;
-
     @Bean
     public Step geocodeStep() {
         return new StepBuilder("geocodeStep", jobRepository)
@@ -50,11 +46,6 @@ public class GeocodeStepConfig {
                 .reader(pendingDealReader)
                 .processor(geocodeProcessor)
                 .writer(realDealWriter())
-                .faultTolerant()
-                .retryLimit(RETRY_LIMIT)
-                .retry(FeignException.class)
-                .skipLimit(SKIP_LIMIT)
-                .skip(Exception.class)
                 .listener(new GeocodeStepListener())
                 .build();
     }
