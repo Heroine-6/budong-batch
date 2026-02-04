@@ -67,7 +67,6 @@ public class PendingDealReader implements ItemReader<RealDeal> {
      */
     public void resetState() {
         currentIterator = null;
-        currentPage = 0;
         pendingExhausted = false;
     }
 }
