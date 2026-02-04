@@ -48,13 +48,20 @@ public class RealDealFixture {
      * 지오코딩 완료 상태 (SUCCESS)
      */
     public static RealDeal success() {
+        return successWithId(1L);
+    }
+
+    /**
+     * 지오코딩 완료 상태 (SUCCESS) - ID 지정
+     */
+    public static RealDeal successWithId(Long id) {
         RealDeal deal = create();
         deal.applyGeoCode(
                 new BigDecimal("37.5012743"),
                 new BigDecimal("127.0396597"),
                 "서울특별시 강남구 역삼로 123"
         );
-        setField(deal, "id", 1L);
+        setField(deal, "id", id);
         return deal;
     }
 
