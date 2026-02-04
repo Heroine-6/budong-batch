@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import java.util.Iterator;
@@ -49,7 +50,7 @@ public class PendingDealReader implements ItemReader<RealDeal> {
     }
 
     private List<RealDeal> fetchNextBatch() {
-        PageRequest pageRequest = PageRequest.of(0, PAGE_SIZE);  // 항상 첫 페이지 (처리된 건은 상태 변경됨)
+        PageRequest pageRequest = PageRequest.of(0, PAGE_SIZE, Sort.by(Sort.Direction.ASC, "id"));
 
         // 1. PENDING 상태 우선 조회
         if (!pendingExhausted) {
