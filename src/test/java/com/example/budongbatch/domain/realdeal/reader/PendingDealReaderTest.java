@@ -1,5 +1,6 @@
 package com.example.budongbatch.domain.realdeal.reader;
 
+import com.example.budongbatch.common.constants.BatchConstants;
 import com.example.budongbatch.common.enums.GeoStatus;
 import com.example.budongbatch.domain.realdeal.entity.RealDeal;
 import com.example.budongbatch.domain.realdeal.repository.RealDealRepository;
@@ -18,7 +19,9 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -45,7 +48,7 @@ class PendingDealReaderTest {
         when(realDealRepository.findByGeoStatus(any(), any(PageRequest.class)))
                 .thenReturn(List.of(p1, p2))
                 .thenReturn(List.of());
-        when(realDealRepository.findByGeoStatusAndRetryCountLessThan(any(), any(), any(PageRequest.class)))
+        when(realDealRepository.findByGeoStatusAndRetryCountLessThan(any(), anyInt(), any(PageRequest.class)))
                 .thenReturn(List.of(r1))
                 .thenReturn(List.of());
 
@@ -54,8 +57,8 @@ class PendingDealReaderTest {
         assertThat(reader.read()).isSameAs(r1);
         assertThat(reader.read()).isNull();
 
-        verify(realDealRepository).findByGeoStatus(GeoStatus.PENDING, any(PageRequest.class));
-        verify(realDealRepository).findByGeoStatusAndRetryCountLessThan(GeoStatus.RETRY, 3, any(PageRequest.class));
+        verify(realDealRepository, atLeast(1)).findByGeoStatus(eq(GeoStatus.PENDING), any(PageRequest.class));
+        verify(realDealRepository, atLeast(1)).findByGeoStatusAndRetryCountLessThan(eq(GeoStatus.RETRY), eq(BatchConstants.GEOCODE_MAX_RETRY), any(PageRequest.class));
     }
 
     @Test
@@ -65,15 +68,15 @@ class PendingDealReaderTest {
 
         when(realDealRepository.findByGeoStatus(any(), any(PageRequest.class)))
                 .thenReturn(List.of());
-        when(realDealRepository.findByGeoStatusAndRetryCountLessThan(any(), any(), any(PageRequest.class)))
+        when(realDealRepository.findByGeoStatusAndRetryCountLessThan(any(), anyInt(), any(PageRequest.class)))
                 .thenReturn(List.of(r1))
                 .thenReturn(List.of());
 
         assertThat(reader.read()).isSameAs(r1);
         assertThat(reader.read()).isNull();
 
-        verify(realDealRepository).findByGeoStatus(GeoStatus.PENDING, any(PageRequest.class));
-        verify(realDealRepository).findByGeoStatusAndRetryCountLessThan(GeoStatus.RETRY, 3, any(PageRequest.class));
+        verify(realDealRepository, atLeast(1)).findByGeoStatus(eq(GeoStatus.PENDING), any(PageRequest.class));
+        verify(realDealRepository, atLeast(1)).findByGeoStatusAndRetryCountLessThan(eq(GeoStatus.RETRY), eq(BatchConstants.GEOCODE_MAX_RETRY), any(PageRequest.class));
     }
 
     @Test
@@ -81,13 +84,13 @@ class PendingDealReaderTest {
     void fetch_usesIdAscSort() {
         when(realDealRepository.findByGeoStatus(any(), any(PageRequest.class)))
                 .thenReturn(List.of());
-        when(realDealRepository.findByGeoStatusAndRetryCountLessThan(any(), any(), any(PageRequest.class)))
+        when(realDealRepository.findByGeoStatusAndRetryCountLessThan(any(), anyInt(), any(PageRequest.class)))
                 .thenReturn(List.of());
 
         reader.read();
 
         ArgumentCaptor<PageRequest> captor = ArgumentCaptor.forClass(PageRequest.class);
-        verify(realDealRepository).findByGeoStatus(GeoStatus.PENDING, captor.capture());
+        verify(realDealRepository).findByGeoStatus(eq(GeoStatus.PENDING), captor.capture());
 
         PageRequest pageRequest = captor.getValue();
         Sort.Order order = pageRequest.getSort().getOrderFor("id");
