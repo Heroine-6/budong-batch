@@ -19,8 +19,8 @@ import java.time.LocalDate;
  *
  * [수동 실행]
  * 개발/테스트 환경에서는 BatchController를 통해 수동 실행 가능
- * POST /api/batch/run
- * POST /api/batch/run?runDate=2026-01-15  (특정 날짜 재처리)
+ * POST /api/v2batch/run
+ * POST /api/v2/batch/run?runDate=2026-01-15  (특정 날짜 재처리)
  */
 @Slf4j
 @Component

@@ -14,7 +14,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  *
  * [실행 방식]
  * 자동: 매일 02:00 스케줄러 실행 (@Scheduled)
- * 수동: POST /api/batch/run (local/dev 환경)
+ * 수동: POST /api/v2/batch/run (local/dev 환경)
  *
  * [API 서버와의 관계]
  * 배치 서버: 데이터 수집/가공 (Write)
