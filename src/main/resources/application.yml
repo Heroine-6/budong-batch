@@ -1,6 +1,8 @@
 spring:
   application:
     name: budong-batch
+  main:
+    web-application-type: none
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
