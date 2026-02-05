@@ -26,7 +26,7 @@ public class PendingDealReader implements ItemReader<RealDeal> {
 
     private final RealDealRepository realDealRepository;
 
-    private static final int PAGE_SIZE = 100;
+    private static final int PAGE_SIZE = 4000;
     private static final int MAX_RETRY = 3; //나중에 상수 많아지면 클래스로 분리
 
     private Iterator<RealDeal> currentIterator;

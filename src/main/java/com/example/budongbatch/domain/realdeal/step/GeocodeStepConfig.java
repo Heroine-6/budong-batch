@@ -18,7 +18,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 /**
  * 지오코딩 Step 설정
  *
- * Chunk 방식 (chunkSize: 100)
+ * Chunk 방식 (chunkSize: 500)
  * Reader: PENDING/RETRY 상태 조회
  * Processor: 네이버 → 카카오 폴백 지오코딩
  * Writer: JPA 업데이트
@@ -38,7 +38,7 @@ public class GeocodeStepConfig {
     private final PendingDealReader pendingDealReader;
     private final GeocodeProcessor geocodeProcessor;
 
-    private static final int CHUNK_SIZE = 100;
+    private static final int CHUNK_SIZE = 4000;
     @Bean
     public Step geocodeStep() {
         return new StepBuilder("geocodeStep", jobRepository)
