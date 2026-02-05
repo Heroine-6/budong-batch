@@ -22,6 +22,7 @@ public class DealPipelineJobConfig {
     private final JobRepository jobRepository;
     private final Step collectStep;
     private final Step geocodeStep;
+    private final Step esIndexInitStep;
     private final Step indexStep;
 
     @Bean
@@ -29,6 +30,22 @@ public class DealPipelineJobConfig {
         return new JobBuilder("dealPipelineJob", jobRepository)
                 .start(collectStep)
                 .next(geocodeStep)
+                .next(esIndexInitStep)
+                .next(indexStep)
+                .build();
+    }
+
+    /**
+     * ES 재인덱싱 전용 Job
+     *
+     * SUCCESS 상태 데이터를 ES에 다시 색인할 때 사용
+     * - 인덱스 매핑 변경 후 재색인
+     * - ES 데이터 유실 시 복구
+     */
+    @Bean
+    public Job reindexJob() {
+        return new JobBuilder("reindexJob", jobRepository)
+                .start(esIndexInitStep)
                 .next(indexStep)
                 .build();
     }

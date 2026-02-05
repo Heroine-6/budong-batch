@@ -18,7 +18,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 /**
  * ES 색인 Step 설정
  *
- * Chunk 방식 (chunkSize: 500)
+ * Chunk 방식 (chunkSize: 2000)
  * Reader: geoStatus = SUCCESS 조회
  * Writer: ElasticsearchOperations 벌크 색인
  *
@@ -34,7 +34,7 @@ public class IndexStepConfig {
     private final SuccessDealReader successDealReader;
     private final EsIndexWriter esIndexWriter;
 
-    private static final int CHUNK_SIZE = 500;
+    private static final int CHUNK_SIZE = 2000;
 
     @Bean
     public Step indexStep() {
