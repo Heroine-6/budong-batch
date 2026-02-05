@@ -1,5 +1,6 @@
 package com.example.budongbatch.domain.realdeal.step;
 
+import com.example.budongbatch.common.constants.BatchConstants;
 import com.example.budongbatch.domain.realdeal.entity.RealDeal;
 import com.example.budongbatch.domain.realdeal.reader.SuccessDealReader;
 import com.example.budongbatch.domain.realdeal.writer.EsIndexWriter;
@@ -18,7 +19,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 /**
  * ES 색인 Step 설정
  *
- * Chunk 방식 (chunkSize: 2000)
+ * Chunk 방식
  * Reader: geoStatus = SUCCESS 조회
  * Writer: ElasticsearchOperations 벌크 색인
  *
@@ -34,12 +35,10 @@ public class IndexStepConfig {
     private final SuccessDealReader successDealReader;
     private final EsIndexWriter esIndexWriter;
 
-    private static final int CHUNK_SIZE = 2000;
-
     @Bean
     public Step indexStep() {
         return new StepBuilder("indexStep", jobRepository)
-                .<RealDeal, RealDeal>chunk(CHUNK_SIZE, transactionManager)
+                .<RealDeal, RealDeal>chunk(BatchConstants.INDEX_CHUNK_SIZE, transactionManager)
                 .reader(successDealReader)
                 .writer(esIndexWriter)
                 .listener(new IndexStepListener())

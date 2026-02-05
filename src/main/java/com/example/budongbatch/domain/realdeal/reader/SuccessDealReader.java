@@ -1,5 +1,6 @@
 package com.example.budongbatch.domain.realdeal.reader;
 
+import com.example.budongbatch.common.constants.BatchConstants;
 import com.example.budongbatch.domain.realdeal.entity.RealDeal;
 import com.example.budongbatch.domain.realdeal.repository.RealDealRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,8 +25,6 @@ import java.util.List;
 public class SuccessDealReader implements ItemStreamReader<RealDeal> {
 
     private final RealDealRepository realDealRepository;
-
-    private static final int PAGE_SIZE = 2000;
     private static final String LAST_PROCESSED_ID_KEY = "indexStep.lastProcessedId";
 
     private Iterator<RealDeal> currentIterator;
@@ -71,6 +70,6 @@ public class SuccessDealReader implements ItemStreamReader<RealDeal> {
     }
 
     private List<RealDeal> fetchNextBatch() {
-        return realDealRepository.findGeoCodedAfter(lastProcessedId, PageRequest.of(0, PAGE_SIZE));
+        return realDealRepository.findGeoCodedAfter(lastProcessedId, PageRequest.of(0, BatchConstants.INDEX_PAGE_SIZE));
     }
 }
