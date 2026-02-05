@@ -1,4 +1,4 @@
-package com.example.budongbatch.global.scheduler;
+package com.example.budongbatch.domain.realdeal.scheduler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +14,13 @@ import java.time.LocalDate;
 /**
  * 실거래가 파이프라인 스케줄러
  *
- * 매일 02:00 실행
+ * [실행 시간]
+ * 매일 02:00 (KST) - 공공데이터 API 트래픽이 적은 새벽 시간대
+ *
+ * [수동 실행]
+ * 개발/테스트 환경에서는 BatchController를 통해 수동 실행 가능
+ * POST /api/batch/run
+ * POST /api/batch/run?runDate=2026-01-15  (특정 날짜 재처리)
  */
 @Slf4j
 @Component

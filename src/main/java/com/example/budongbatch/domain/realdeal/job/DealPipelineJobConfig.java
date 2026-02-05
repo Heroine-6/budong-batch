@@ -11,8 +11,9 @@ import org.springframework.context.annotation.Configuration;
 /**
  * 실거래가 데이터 파이프라인 Job 설정
  *
- * 파이프라인: collectStep → geocodeStep → indexStep
- * 공공데이터, 지오코딩 따로 돌리고싶으면 별도 job필요
+ * Job 파라미터
+ * runDate: 배치 실행 날짜 (예: 2026-02-05)
+ * timestamp: 같은 날 재실행 허용을 위한 타임스탬프
  */
 @Configuration
 @RequiredArgsConstructor
