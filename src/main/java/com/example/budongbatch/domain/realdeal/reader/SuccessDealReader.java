@@ -25,7 +25,7 @@ public class SuccessDealReader implements ItemStreamReader<RealDeal> {
 
     private final RealDealRepository realDealRepository;
 
-    private static final int PAGE_SIZE = 500;
+    private static final int PAGE_SIZE = 2000;
     private static final String LAST_PROCESSED_ID_KEY = "indexStep.lastProcessedId";
 
     private Iterator<RealDeal> currentIterator;
