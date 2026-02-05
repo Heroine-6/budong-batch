@@ -29,6 +29,7 @@ public class DealPipelineJobScheduler {
         try {
             JobParameters jobParameters = new JobParametersBuilder()
                     .addString("runDate", LocalDate.now().toString())
+                    .addLong("timestamp", System.currentTimeMillis())
                     .toJobParameters();
 
             log.info("실거래가 파이프라인 Job 시작");
