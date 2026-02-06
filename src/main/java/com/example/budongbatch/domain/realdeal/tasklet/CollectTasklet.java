@@ -8,8 +8,8 @@ import com.example.budongbatch.domain.realdeal.client.publicdata.OffiClient;
 import com.example.budongbatch.domain.realdeal.client.publicdata.VillaClient;
 import com.example.budongbatch.domain.realdeal.converter.RealDealConverter;
 import com.example.budongbatch.domain.realdeal.entity.RealDeal;
-import com.example.budongbatch.domain.realdeal.repository.RealDealRepository;
 import com.example.budongbatch.domain.realdeal.service.LawdCodeService;
+import com.example.budongbatch.domain.realdeal.service.RealDealSaveService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.StepContribution;
@@ -17,7 +17,6 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.stereotype.Component;
 
@@ -44,7 +43,7 @@ public class CollectTasklet implements Tasklet {
     private final AptClient aptClient;
     private final OffiClient offiClient;
     private final VillaClient villaClient;
-    private final RealDealRepository realDealRepository;
+    private final RealDealSaveService realDealSaveService;
     private final RealDealConverter realDealConverter;
 
     @Value("${external.api.service-key}")
@@ -190,17 +189,6 @@ public class CollectTasklet implements Tasklet {
     }
 
     private int saveDeals(List<RealDeal> deals) {
-        int saved = 0;
-        for (RealDeal deal : deals) {
-            try {
-                realDealRepository.save(deal);
-                saved++;
-            } catch (DataIntegrityViolationException e) {
-                // 중복 데이터 무시 (유니크 제약 위반)
-                log.debug("저장 스킵 - 중복 데이터: name={}, dealDate={}, error={}",
-                        deal.getPropertyName(), deal.getDealDate(), e.getMessage());
-            }
-        }
-        return saved;
+        return realDealSaveService.saveAllIgnoreDuplicates(deals);
     }
 }
