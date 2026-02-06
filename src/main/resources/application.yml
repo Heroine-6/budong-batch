@@ -1,6 +1,8 @@
 spring:
   application:
     name: budong-batch
+  main:
+    web-application-type: none
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -29,6 +31,15 @@ spring:
 
   elasticsearch:
     uris: ${ELASTIC_SEARCH}
+
+batch:
+  geocode:
+    chunk-size: 2000
+    page-size: 2000
+    max-retry: 3
+  index:
+    chunk-size: 2000
+    page-size: 2000
 
 external:
   api:

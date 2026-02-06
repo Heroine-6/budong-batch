@@ -1,5 +1,6 @@
 package com.example.budongbatch.domain.realdeal.reader;
 
+import com.example.budongbatch.common.config.BatchProperties;
 import com.example.budongbatch.common.enums.GeoStatus;
 import com.example.budongbatch.domain.realdeal.entity.RealDeal;
 import com.example.budongbatch.domain.realdeal.repository.RealDealRepository;
@@ -25,9 +26,7 @@ import java.util.List;
 public class PendingDealReader implements ItemReader<RealDeal> {
 
     private final RealDealRepository realDealRepository;
-
-    private static final int PAGE_SIZE = 100;
-    private static final int MAX_RETRY = 3; //나중에 상수 많아지면 클래스로 분리
+    private final BatchProperties batchProperties;
 
     private Iterator<RealDeal> currentIterator;
     private boolean pendingExhausted = false;
@@ -50,7 +49,9 @@ public class PendingDealReader implements ItemReader<RealDeal> {
     }
 
     private List<RealDeal> fetchNextBatch() {
-        PageRequest pageRequest = PageRequest.of(0, PAGE_SIZE, Sort.by(Sort.Direction.ASC, "id"));
+        int pageSize = batchProperties.getGeocode().getPageSize();
+        int maxRetry = batchProperties.getGeocode().getMaxRetry();
+        PageRequest pageRequest = PageRequest.of(0, pageSize, Sort.by(Sort.Direction.ASC, "id"));
 
         // 1. PENDING 상태 우선 조회
         if (!pendingExhausted) {
@@ -62,6 +63,6 @@ public class PendingDealReader implements ItemReader<RealDeal> {
         }
 
         // 2. RETRY 상태 조회 (재시도 횟수 미만)
-        return realDealRepository.findByGeoStatusAndRetryCountLessThan(GeoStatus.RETRY, MAX_RETRY, pageRequest);
+        return realDealRepository.findByGeoStatusAndRetryCountLessThan(GeoStatus.RETRY, maxRetry, pageRequest);
     }
 }

@@ -23,7 +23,7 @@ import java.time.LocalDate;
 @Getter
 @Entity
 @Table(name = "real_deals")
-// 인덱스/유니크 제약은 resources/db/v2_real_deal_index.sql 에서 관리
+// 인덱스/유니크 제약은 resources/db/v3_real_deal_index.sql 에서 관리
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RealDeal extends BaseEntity {
 

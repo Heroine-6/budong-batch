@@ -53,7 +53,8 @@ public class CollectTasklet implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
-        String dealYmd = YearMonth.now().format(DEAL_YMD_FORMAT);
+        // 전월 데이터 수집 (실거래가 갱신 지연 고려)
+        String dealYmd = YearMonth.now().minusMonths(1).format(DEAL_YMD_FORMAT);
         List<String> lawdCodes = lawdCodeService.getAllLawdCodes();
 
         int totalCollected = 0;
