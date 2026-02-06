@@ -1,6 +1,6 @@
 package com.example.budongbatch.domain.realdeal.step;
 
-import com.example.budongbatch.common.constants.BatchConstants;
+import com.example.budongbatch.common.config.BatchProperties;
 import com.example.budongbatch.domain.realdeal.entity.RealDeal;
 import com.example.budongbatch.domain.realdeal.processor.GeocodeProcessor;
 import com.example.budongbatch.domain.realdeal.reader.PendingDealReader;
@@ -38,10 +38,12 @@ public class GeocodeStepConfig {
     private final EntityManagerFactory entityManagerFactory;
     private final PendingDealReader pendingDealReader;
     private final GeocodeProcessor geocodeProcessor;
+    private final BatchProperties batchProperties;
+
     @Bean
     public Step geocodeStep() {
         return new StepBuilder("geocodeStep", jobRepository)
-                .<RealDeal, RealDeal>chunk(BatchConstants.GEOCODE_CHUNK_SIZE, transactionManager)
+                .<RealDeal, RealDeal>chunk(batchProperties.getGeocode().getChunkSize(), transactionManager)
                 .reader(pendingDealReader)
                 .processor(geocodeProcessor)
                 .writer(realDealWriter())

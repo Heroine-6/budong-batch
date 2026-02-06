@@ -1,6 +1,6 @@
 package com.example.budongbatch.domain.realdeal.processor;
 
-import com.example.budongbatch.common.constants.BatchConstants;
+import com.example.budongbatch.common.config.BatchProperties;
 import com.example.budongbatch.domain.realdeal.client.geocoding.KakaoGeoClient;
 import com.example.budongbatch.domain.realdeal.client.geocoding.KakaoGeoResponse;
 import com.example.budongbatch.domain.realdeal.client.geocoding.NaverGeoClient;
@@ -28,6 +28,7 @@ public class GeocodeProcessor implements ItemProcessor<RealDeal, RealDeal> {
 
     private final NaverGeoClient naverGeoClient;
     private final KakaoGeoClient kakaoGeoClient;
+    private final BatchProperties batchProperties;
 
     @Override
     public RealDeal process(RealDeal item) {
@@ -87,7 +88,7 @@ public class GeocodeProcessor implements ItemProcessor<RealDeal, RealDeal> {
     }
 
     private void handleGeocodingFailure(RealDeal item) {
-        if (item.getRetryCount() >= BatchConstants.GEOCODE_MAX_RETRY - 1) {
+        if (item.getRetryCount() >= batchProperties.getGeocode().getMaxRetry() - 1) {
             item.markGeoFailed(true);  // 영구 실패
             log.warn("지오코딩 최종 실패 (FAILED): address={}, retryCount={}",
                     item.getAddress(), item.getRetryCount());

@@ -1,5 +1,6 @@
 package com.example.budongbatch.domain.realdeal.processor;
 
+import com.example.budongbatch.common.config.BatchProperties;
 import com.example.budongbatch.common.enums.GeoStatus;
 import com.example.budongbatch.domain.realdeal.client.geocoding.KakaoGeoClient;
 import com.example.budongbatch.domain.realdeal.client.geocoding.KakaoGeoResponse;
@@ -38,7 +39,9 @@ class GeocodeProcessorTest {
 
     @BeforeEach
     void setUp() {
-        processor = new GeocodeProcessor(naverGeoClient, kakaoGeoClient);
+        BatchProperties props = new BatchProperties();
+        props.setGeocode(new BatchProperties.Geocode());
+        processor = new GeocodeProcessor(naverGeoClient, kakaoGeoClient, props);
     }
 
     @Nested

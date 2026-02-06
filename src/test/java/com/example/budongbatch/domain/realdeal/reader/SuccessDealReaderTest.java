@@ -1,5 +1,6 @@
 package com.example.budongbatch.domain.realdeal.reader;
 
+import com.example.budongbatch.common.config.BatchProperties;
 import com.example.budongbatch.domain.realdeal.entity.RealDeal;
 import com.example.budongbatch.domain.realdeal.repository.RealDealRepository;
 import com.example.budongbatch.fixture.RealDealFixture;
@@ -30,7 +31,9 @@ class SuccessDealReaderTest {
 
     @BeforeEach
     void setUp() {
-        reader = new SuccessDealReader(realDealRepository);
+        BatchProperties props = new BatchProperties();
+        props.setIndex(new BatchProperties.Index());
+        reader = new SuccessDealReader(realDealRepository, props);
     }
 
     @Test

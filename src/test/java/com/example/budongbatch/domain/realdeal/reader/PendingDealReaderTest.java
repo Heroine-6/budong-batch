@@ -1,6 +1,6 @@
 package com.example.budongbatch.domain.realdeal.reader;
 
-import com.example.budongbatch.common.constants.BatchConstants;
+import com.example.budongbatch.common.config.BatchProperties;
 import com.example.budongbatch.common.enums.GeoStatus;
 import com.example.budongbatch.domain.realdeal.entity.RealDeal;
 import com.example.budongbatch.domain.realdeal.repository.RealDealRepository;
@@ -35,7 +35,9 @@ class PendingDealReaderTest {
 
     @BeforeEach
     void setUp() {
-        reader = new PendingDealReader(realDealRepository);
+        BatchProperties props = new BatchProperties();
+        props.setGeocode(new BatchProperties.Geocode());
+        reader = new PendingDealReader(realDealRepository, props);
     }
 
     @Test
@@ -58,7 +60,7 @@ class PendingDealReaderTest {
         assertThat(reader.read()).isNull();
 
         verify(realDealRepository, atLeast(1)).findByGeoStatus(eq(GeoStatus.PENDING), any(PageRequest.class));
-        verify(realDealRepository, atLeast(1)).findByGeoStatusAndRetryCountLessThan(eq(GeoStatus.RETRY), eq(BatchConstants.GEOCODE_MAX_RETRY), any(PageRequest.class));
+        verify(realDealRepository, atLeast(1)).findByGeoStatusAndRetryCountLessThan(eq(GeoStatus.RETRY), eq(3), any(PageRequest.class));
     }
 
     @Test
@@ -76,7 +78,7 @@ class PendingDealReaderTest {
         assertThat(reader.read()).isNull();
 
         verify(realDealRepository, atLeast(1)).findByGeoStatus(eq(GeoStatus.PENDING), any(PageRequest.class));
-        verify(realDealRepository, atLeast(1)).findByGeoStatusAndRetryCountLessThan(eq(GeoStatus.RETRY), eq(BatchConstants.GEOCODE_MAX_RETRY), any(PageRequest.class));
+        verify(realDealRepository, atLeast(1)).findByGeoStatusAndRetryCountLessThan(eq(GeoStatus.RETRY), eq(3), any(PageRequest.class));
     }
 
     @Test

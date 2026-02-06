@@ -1,6 +1,6 @@
 package com.example.budongbatch.domain.realdeal.step;
 
-import com.example.budongbatch.common.constants.BatchConstants;
+import com.example.budongbatch.common.config.BatchProperties;
 import com.example.budongbatch.domain.realdeal.entity.RealDeal;
 import com.example.budongbatch.domain.realdeal.reader.SuccessDealReader;
 import com.example.budongbatch.domain.realdeal.writer.EsIndexWriter;
@@ -34,11 +34,12 @@ public class IndexStepConfig {
     private final PlatformTransactionManager transactionManager;
     private final SuccessDealReader successDealReader;
     private final EsIndexWriter esIndexWriter;
+    private final BatchProperties batchProperties;
 
     @Bean
     public Step indexStep() {
         return new StepBuilder("indexStep", jobRepository)
-                .<RealDeal, RealDeal>chunk(BatchConstants.INDEX_CHUNK_SIZE, transactionManager)
+                .<RealDeal, RealDeal>chunk(batchProperties.getIndex().getChunkSize(), transactionManager)
                 .reader(successDealReader)
                 .writer(esIndexWriter)
                 .listener(new IndexStepListener())

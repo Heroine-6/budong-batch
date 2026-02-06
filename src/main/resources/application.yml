@@ -32,6 +32,15 @@ spring:
   elasticsearch:
     uris: ${ELASTIC_SEARCH}
 
+batch:
+  geocode:
+    chunk-size: 2000
+    page-size: 2000
+    max-retry: 3
+  index:
+    chunk-size: 2000
+    page-size: 2000
+
 external:
   api:
     service-key: ${API_SERVICE_KEY}
