@@ -61,23 +61,40 @@ public class CollectTasklet implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
         String dealYmd = resolveDealYmd();
-        log.info("수집 대상 월: {}", dealYmd);
         List<String> lawdCodes = lawdCodeService.getAllLawdCodes();
 
+        log.info("[수집 시작] 대상월: {} | 법정동: {}개", dealYmd, lawdCodes.size());
+
         int totalCollected = 0;
+        int totalSaved = 0;
+        int processedCount = 0;
 
         for (String lawdCd : lawdCodes) {
             try {
-                int collected = collectByLawdCd(lawdCd, dealYmd);
-                totalCollected += collected;
+                CollectResult result = collectByLawdCd(lawdCd, dealYmd);
+                totalCollected += result.collected;
+                totalSaved += result.saved;
+                processedCount++;
+
+                // 100개 법정동마다 진행상황 로그
+                if (processedCount % 100 == 0) {
+                    log.info("[진행] {}/{} 법정동 처리 | 수집: {}건 | 저장: {}건",
+                            processedCount, lawdCodes.size(), totalCollected, totalSaved);
+                }
             } catch (Exception e) {
                 log.warn("법정동 {} 수집 실패: {}", lawdCd, e.getMessage());
             }
         }
 
-        log.info("실거래가 수집 완료 - 총 수집: {}건", totalCollected);
+        int duplicates = totalCollected - totalSaved;
+        log.info("[수집 완료] 법정동: {}개 | API 수집: {}건 | 저장: {}건 | 중복 스킵: {}건",
+                processedCount, totalCollected, totalSaved, duplicates);
+
         return RepeatStatus.FINISHED;
     }
+
+    /** 수집 결과 (수집 건수 + 저장 건수) */
+    private record CollectResult(int collected, int saved) {}
 
     /**
      * 수집 대상 월 결정
@@ -108,7 +125,7 @@ public class CollectTasklet implements Tasklet {
         return YearMonth.now().minusMonths(1).format(DEAL_YMD_FORMAT);
     }
 
-    private int collectByLawdCd(String lawdCd, String dealYmd) {
+    private CollectResult collectByLawdCd(String lawdCd, String dealYmd) {
         List<RealDeal> allDeals = new ArrayList<>();
         String addressPrefix = lawdCodeService.getAddressPrefixFromLawdCd(lawdCd).orElse("");
 
@@ -119,10 +136,10 @@ public class CollectTasklet implements Tasklet {
         int saved = saveDeals(allDeals);
 
         if (!allDeals.isEmpty()) {
-            log.debug("법정동 {} 수집 완료 - 수집: {}건, 저장: {}건", lawdCd, allDeals.size(), saved);
+            log.debug("법정동 {} - 수집: {}건, 저장: {}건", lawdCd, allDeals.size(), saved);
         }
 
-        return allDeals.size();
+        return new CollectResult(allDeals.size(), saved);
     }
 
     private List<RealDeal> collectApt(String lawdCd, String dealYmd, String addressPrefix) {
