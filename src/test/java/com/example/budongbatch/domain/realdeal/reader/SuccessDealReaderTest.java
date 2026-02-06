@@ -32,7 +32,9 @@ class SuccessDealReaderTest {
     @BeforeEach
     void setUp() {
         BatchProperties props = new BatchProperties();
-        props.setIndex(new BatchProperties.Index());
+        BatchProperties.Index index = new BatchProperties.Index();
+        index.setPageSize(100);
+        props.setIndex(index);
         reader = new SuccessDealReader(realDealRepository, props);
     }
 

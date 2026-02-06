@@ -36,7 +36,10 @@ class PendingDealReaderTest {
     @BeforeEach
     void setUp() {
         BatchProperties props = new BatchProperties();
-        props.setGeocode(new BatchProperties.Geocode());
+        BatchProperties.Geocode geocode = new BatchProperties.Geocode();
+        geocode.setPageSize(100);
+        geocode.setMaxRetry(3);
+        props.setGeocode(geocode);
         reader = new PendingDealReader(realDealRepository, props);
     }
 
