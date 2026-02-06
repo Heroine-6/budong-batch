@@ -18,6 +18,7 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.stereotype.Component;
 
 import java.time.YearMonth;
@@ -34,6 +35,7 @@ import java.util.List;
  * 변환 로직 분리: RealDealConverter로 분리하여 테스트 용이성 확보
  */
 @Slf4j
+@StepScope
 @Component
 @RequiredArgsConstructor
 public class CollectTasklet implements Tasklet {
@@ -48,13 +50,19 @@ public class CollectTasklet implements Tasklet {
     @Value("${external.api.service-key}")
     private String serviceKey;
 
+    @Value("#{jobParameters['runDate']}")
+    private String runDate;
+
+    @Value("#{jobParameters['dealYmd'] ?: ''}")
+    private String dealYmdParam;
+
     private static final int NUM_OF_ROWS = 1000;
     private static final DateTimeFormatter DEAL_YMD_FORMAT = DateTimeFormatter.ofPattern("yyyyMM");
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
-        // 전월 데이터 수집 (실거래가 갱신 지연 고려)
-        String dealYmd = YearMonth.now().minusMonths(1).format(DEAL_YMD_FORMAT);
+        String dealYmd = resolveDealYmd();
+        log.info("수집 대상 월: {}", dealYmd);
         List<String> lawdCodes = lawdCodeService.getAllLawdCodes();
 
         int totalCollected = 0;
@@ -70,6 +78,35 @@ public class CollectTasklet implements Tasklet {
 
         log.info("실거래가 수집 완료 - 총 수집: {}건", totalCollected);
         return RepeatStatus.FINISHED;
+    }
+
+    /**
+     * 수집 대상 월 결정
+     * 우선순위: dealYmd > runDate > 전월
+     *
+     * dealYmd: 직접 지정 (예: 202512)
+     * runDate: 날짜에서 추출 (예: 2025-12-01 → 202512)
+     */
+    private String resolveDealYmd() {
+        // 1. dealYmd 직접 지정 (예: 202512)
+        if (dealYmdParam != null && !dealYmdParam.isBlank()) {
+            log.info("dealYmd 파라미터 사용: {}", dealYmdParam);
+            return dealYmdParam;
+        }
+
+        // 2. runDate에서 추출 (예: 2025-12-01 → 202512)
+        if (runDate != null && !runDate.isBlank()) {
+            try {
+                String ym = YearMonth.from(java.time.LocalDate.parse(runDate)).format(DEAL_YMD_FORMAT);
+                log.info("runDate에서 추출: {} → {}", runDate, ym);
+                return ym;
+            } catch (Exception e) {
+                log.warn("runDate 파싱 실패, 전월 기준으로 수집합니다: {}", runDate);
+            }
+        }
+
+        // 3. 기본값: 전월
+        return YearMonth.now().minusMonths(1).format(DEAL_YMD_FORMAT);
     }
 
     private int collectByLawdCd(String lawdCd, String dealYmd) {

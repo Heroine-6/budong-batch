@@ -4,6 +4,7 @@ import com.example.budongbatch.common.enums.GeoStatus;
 import com.example.budongbatch.domain.realdeal.entity.RealDeal;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -62,4 +63,14 @@ public interface RealDealRepository extends JpaRepository<RealDeal, Long> {
             @Param("maxId") Long maxId,
             @Param("maxRetry") int maxRetry,
             Pageable pageable);
+
+    // FAILED → RETRY 상태 변경 (재시도 대상으로 전환)
+    @Modifying
+    @Query("""
+            UPDATE RealDeal rd
+            SET rd.geoStatus = 'RETRY', rd.retryCount = 0
+            WHERE rd.geoStatus = 'FAILED'
+              AND rd.isDeleted = false
+            """)
+    int resetFailedToRetry();
 }

@@ -49,4 +49,22 @@ public class DealPipelineJobConfig {
                 .next(indexStep)
                 .build();
     }
+
+    /**
+     * 지오코딩 재시도 전용 Job
+     *
+     * FAILED 상태 데이터만 재시도할 때 사용
+     * 1. resetFailedStep: FAILED → RETRY로 상태 변경
+     * 2. geocodeStep: 지오코딩 재시도
+     * 3. indexStep: 성공한 건 ES 색인
+     */
+    @Bean
+    public Job geocodeRetryJob(Step resetFailedStep) {
+        return new JobBuilder("geocodeRetryJob", jobRepository)
+                .start(resetFailedStep)
+                .next(geocodeStep)
+                .next(esIndexInitStep)
+                .next(indexStep)
+                .build();
+    }
 }
