@@ -19,9 +19,7 @@ import java.time.LocalDate;
  * 초기 적재/재인덱싱을 빠르게 실행하려고 만든 유틸성 런너
  *
  * 사용법:
- * ./gradlew bootRun --args='--batch.job.name=dealPipelineJob'     # 전체 파이프라인
- * ./gradlew bootRun --args='--batch.job.name=reindexJob'          # ES 재인덱싱만
- * ./gradlew bootRun --args='--batch.job.name=reindexJob --batch.runDate=2026-01-15'
+ * Makefile
  *
  * batch.job.name이 없으면 아무 Job도 실행하지 않음 (스케줄러만 동작)
  */
