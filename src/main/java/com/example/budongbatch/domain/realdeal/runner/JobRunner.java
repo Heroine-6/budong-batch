@@ -37,6 +37,9 @@ public class JobRunner implements ApplicationRunner {
     @Value("${batch.runDate:}")
     private String runDate;
 
+    @Value("${batch.dealYmd:}")
+    private String dealYmd;
+
     @Override
     public void run(ApplicationArguments args) throws Exception {
         if (jobName == null || jobName.isBlank()) {
@@ -48,13 +51,19 @@ public class JobRunner implements ApplicationRunner {
             Job job = applicationContext.getBean(jobName, Job.class);
 
             LocalDate targetDate = parseRunDate(runDate);
-            JobParameters jobParameters = new JobParametersBuilder()
+            JobParametersBuilder builder = new JobParametersBuilder()
                     .addString("runDate", targetDate.toString())
-                    .addLong("timestamp", System.currentTimeMillis())
-                    .toJobParameters();
+                    .addLong("timestamp", System.currentTimeMillis());
 
-            log.info("Job 실행: {} (runDate: {})", jobName, targetDate);
-            jobLauncher.run(job, jobParameters);
+            // dealYmd 직접 지정 시 추가 (예: 202512)
+            if (dealYmd != null && !dealYmd.isBlank()) {
+                builder.addString("dealYmd", dealYmd);
+                log.info("Job 실행: {} (dealYmd: {})", jobName, dealYmd);
+            } else {
+                log.info("Job 실행: {} (runDate: {})", jobName, targetDate);
+            }
+
+            jobLauncher.run(job, builder.toJobParameters());
             log.info("Job 완료: {}", jobName);
         } catch (Exception e) {
             log.error("Job 실행 실패: {}", jobName, e);

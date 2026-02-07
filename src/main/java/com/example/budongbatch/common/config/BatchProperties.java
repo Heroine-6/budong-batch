@@ -17,15 +17,16 @@ public class BatchProperties {
     @Getter
     @Setter
     public static class Geocode {
-        private int chunkSize = 4000;
-        private int pageSize = 4000;
-        private int maxRetry = 3;
+        private int chunkSize;
+        private int pageSize;
+        private int maxRetry;
+        private int partitionSize;
     }
 
     @Getter
     @Setter
     public static class Index {
-        private int chunkSize = 2000;
-        private int pageSize = 2000;
+        private int chunkSize;
+        private int pageSize;
     }
 }

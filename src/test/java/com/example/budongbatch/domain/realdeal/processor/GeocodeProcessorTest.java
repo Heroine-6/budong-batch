@@ -40,7 +40,9 @@ class GeocodeProcessorTest {
     @BeforeEach
     void setUp() {
         BatchProperties props = new BatchProperties();
-        props.setGeocode(new BatchProperties.Geocode());
+        BatchProperties.Geocode geocode = new BatchProperties.Geocode();
+        geocode.setMaxRetry(3);
+        props.setGeocode(geocode);
         processor = new GeocodeProcessor(naverGeoClient, kakaoGeoClient, props);
     }
 
