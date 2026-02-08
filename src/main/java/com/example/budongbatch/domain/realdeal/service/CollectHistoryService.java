@@ -1,5 +1,6 @@
 package com.example.budongbatch.domain.realdeal.service;
 
+import com.example.budongbatch.common.config.BatchProperties;
 import com.example.budongbatch.domain.realdeal.entity.BatchDealCollectFailedLawd;
 import com.example.budongbatch.domain.realdeal.entity.BatchDealCollectHistory;
 import com.example.budongbatch.domain.realdeal.enums.CollectStatus;
@@ -10,8 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,7 +24,7 @@ public class CollectHistoryService {
 
     private final BatchDealCollectHistoryRepository historyRepository;
     private final BatchDealCollectFailedLawdRepository failedLawdRepository;
-    private static final Duration RUNNING_TIMEOUT = Duration.ofHours(24);
+    private final BatchProperties batchProperties;
 
     @Transactional
     public CollectInitResult init(String dealYmd) {
@@ -32,9 +33,10 @@ public class CollectHistoryService {
 
         if (existing.isPresent()) {
             BatchDealCollectHistory history = existing.get();
+            Duration timeout = Duration.ofHours(batchProperties.getCollect().getRunningTimeoutHours());
             if (history.getStatus() == CollectStatus.RUNNING
                     && history.getStartedAt() != null
-                    && history.getStartedAt().isBefore(now.minus(RUNNING_TIMEOUT))) {
+                    && history.getStartedAt().isBefore(now.minus(timeout))) {
                 history.markFailedTimeout(now);
                 historyRepository.save(history);
                 log.warn("RUNNING 상태 타임아웃 처리 - dealYmd={}, startedAt={}",

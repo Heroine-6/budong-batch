@@ -33,7 +33,7 @@ class CollectHistoryServiceTest {
     @Test
     @DisplayName("이력이 없으면 RUNNING으로 시작한다")
     void init_createsHistoryWhenMissing() {
-        CollectHistoryService service = new CollectHistoryService(historyRepository, failedLawdRepository);
+        CollectHistoryService service = new CollectHistoryService(historyRepository, failedLawdRepository, batchPropertiesWithTimeout(24));
         when(historyRepository.findById("202512")).thenReturn(Optional.empty());
 
         CollectHistoryService.CollectInitResult result = service.init("202512");
@@ -50,7 +50,7 @@ class CollectHistoryServiceTest {
     @Test
     @DisplayName("SUCCESS 이력은 스킵한다")
     void init_skipsWhenSuccess() {
-        CollectHistoryService service = new CollectHistoryService(historyRepository, failedLawdRepository);
+        CollectHistoryService service = new CollectHistoryService(historyRepository, failedLawdRepository, batchPropertiesWithTimeout(24));
         BatchDealCollectHistory history = BatchDealCollectHistory.start("202512", LocalDateTime.now());
         history.finish(CollectStatus.SUCCESS, 10, 0, LocalDateTime.now());
         when(historyRepository.findById("202512")).thenReturn(Optional.of(history));
@@ -64,7 +64,7 @@ class CollectHistoryServiceTest {
     @Test
     @DisplayName("RUNNING이 24시간 이상이면 FAILED로 전환 후 재개한다")
     void init_marksRunningTimeoutToFailed() {
-        CollectHistoryService service = new CollectHistoryService(historyRepository, failedLawdRepository);
+        CollectHistoryService service = new CollectHistoryService(historyRepository, failedLawdRepository, batchPropertiesWithTimeout(24));
         BatchDealCollectHistory history = BatchDealCollectHistory.start("202512", LocalDateTime.now().minusDays(2));
         when(historyRepository.findById("202512")).thenReturn(Optional.of(history));
 
@@ -80,7 +80,7 @@ class CollectHistoryServiceTest {
     @Test
     @DisplayName("실패 법정동이 있으면 해당 코드만 반환하고 기록을 삭제한다")
     void resolveTargetLawdCodes_usesFailedList() {
-        CollectHistoryService service = new CollectHistoryService(historyRepository, failedLawdRepository);
+        CollectHistoryService service = new CollectHistoryService(historyRepository, failedLawdRepository, batchPropertiesWithTimeout(24));
         when(failedLawdRepository.findByDealYmd("202512"))
                 .thenReturn(List.of(
                         BatchDealCollectFailedLawd.of("202512", "11110"),
@@ -96,7 +96,7 @@ class CollectHistoryServiceTest {
     @Test
     @DisplayName("실패 법정동이 없으면 전체 코드를 반환한다")
     void resolveTargetLawdCodes_returnsAllWhenNoFailed() {
-        CollectHistoryService service = new CollectHistoryService(historyRepository, failedLawdRepository);
+        CollectHistoryService service = new CollectHistoryService(historyRepository, failedLawdRepository, batchPropertiesWithTimeout(24));
         when(failedLawdRepository.findByDealYmd("202512")).thenReturn(List.of());
 
         List<String> targets = service.resolveTargetLawdCodes("202512", List.of("11110", "11140"));
@@ -107,7 +107,7 @@ class CollectHistoryServiceTest {
     @Test
     @DisplayName("실패가 없으면 SUCCESS로 저장한다")
     void finish_marksSuccess() {
-        CollectHistoryService service = new CollectHistoryService(historyRepository, failedLawdRepository);
+        CollectHistoryService service = new CollectHistoryService(historyRepository, failedLawdRepository, batchPropertiesWithTimeout(24));
         when(historyRepository.findById("202512")).thenReturn(Optional.of(
                 BatchDealCollectHistory.start("202512", LocalDateTime.now())
         ));
@@ -124,7 +124,7 @@ class CollectHistoryServiceTest {
     @Test
     @DisplayName("실패가 있으면 FAILED로 저장하고 실패 법정동을 기록한다")
     void finish_marksFailedAndStoresFailedLawd() {
-        CollectHistoryService service = new CollectHistoryService(historyRepository, failedLawdRepository);
+        CollectHistoryService service = new CollectHistoryService(historyRepository, failedLawdRepository, batchPropertiesWithTimeout(24));
         when(historyRepository.findById("202512")).thenReturn(Optional.of(
                 BatchDealCollectHistory.start("202512", LocalDateTime.now())
         ));
@@ -137,5 +137,13 @@ class CollectHistoryServiceTest {
         assertThat(captor.getValue().getFailedLawdCount()).isEqualTo(2);
 
         verify(failedLawdRepository).saveAll(any());
+    }
+
+    private com.example.budongbatch.common.config.BatchProperties batchPropertiesWithTimeout(int hours) {
+        com.example.budongbatch.common.config.BatchProperties props = new com.example.budongbatch.common.config.BatchProperties();
+        com.example.budongbatch.common.config.BatchProperties.Collect collect = new com.example.budongbatch.common.config.BatchProperties.Collect();
+        collect.setRunningTimeoutHours(hours);
+        props.setCollect(collect);
+        return props;
     }
 }
