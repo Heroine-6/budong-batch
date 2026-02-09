@@ -8,6 +8,14 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * 월별 수집 이력
+ *
+ * PK: dealYmd (예: "202512")
+ * 용도: 수집 상태 추적, 중복 수집 방지, 재시도 지원
+ *
+ * @see CollectStatus 상태 전이 규칙
+ */
 @Entity
 @Getter
 @Table(name = "batch_deal_collect_history")
@@ -22,12 +30,14 @@ public class BatchDealCollectHistory {
     @Column(name = "status", length = 20, nullable = false)
     private CollectStatus status;
 
+    // API에서 수집한 총 건수
     @Column(name = "collected_count")
     private Integer collectedCount;
 
     @Column(name = "failed_lawd_count")
     private Integer failedLawdCount;
 
+    // 수집 시작 시각
     @Column(name = "started_at")
     private LocalDateTime startedAt;
 

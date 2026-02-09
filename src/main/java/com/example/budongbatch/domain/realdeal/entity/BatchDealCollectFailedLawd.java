@@ -9,6 +9,14 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 수집 실패 법정동 기록
+ *
+ * 용도: 부분 실패 시 재시도 대상 추적
+ * - 수집 실패한 법정동 코드 저장
+ * - 다음 수집 시 이 목록만 재시도
+ * - 성공 시 삭제됨
+ */
 @Entity
 @Getter
 @Table(name = "batch_deal_collect_failed_lawd")
