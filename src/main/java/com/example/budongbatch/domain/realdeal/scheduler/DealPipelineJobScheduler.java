@@ -18,9 +18,7 @@ import java.time.LocalDate;
  * 매일 02:00 (KST) - 공공데이터 API 트래픽이 적은 새벽 시간대
  *
  * [수동 실행]
- * 개발/테스트 환경에서는 BatchController를 통해 수동 실행 가능
- * POST /api/v2batch/run
- * POST /api/v2/batch/run?runDate=2026-01-15  (특정 날짜 재처리)
+ * CLI로 실행
  */
 @Slf4j
 @Component
