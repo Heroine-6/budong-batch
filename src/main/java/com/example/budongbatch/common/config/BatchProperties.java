@@ -13,6 +13,7 @@ public class BatchProperties {
 
     private Geocode geocode = new Geocode();
     private Index index = new Index();
+    private Collect collect = new Collect();
 
     @Getter
     @Setter
@@ -29,4 +30,12 @@ public class BatchProperties {
         private int chunkSize;
         private int pageSize;
     }
+
+    @Getter
+    @Setter
+    public static class Collect {
+        /** RUNNING 상태 타임아웃 (시간). 이 시간 초과 시 FAILED로 간주 */
+        private int runningTimeoutHours = 24;
+    }
+
 }

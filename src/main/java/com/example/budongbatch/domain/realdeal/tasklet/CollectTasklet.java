@@ -8,6 +8,7 @@ import com.example.budongbatch.domain.realdeal.client.publicdata.OffiClient;
 import com.example.budongbatch.domain.realdeal.client.publicdata.VillaClient;
 import com.example.budongbatch.domain.realdeal.converter.RealDealConverter;
 import com.example.budongbatch.domain.realdeal.entity.RealDeal;
+import com.example.budongbatch.domain.realdeal.service.CollectHistoryService;
 import com.example.budongbatch.domain.realdeal.service.LawdCodeService;
 import com.example.budongbatch.domain.realdeal.service.RealDealSaveService;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +46,7 @@ public class CollectTasklet implements Tasklet {
     private final VillaClient villaClient;
     private final RealDealSaveService realDealSaveService;
     private final RealDealConverter realDealConverter;
+    private final CollectHistoryService collectHistoryService;
 
     @Value("${external.api.service-key}")
     private String serviceKey;
@@ -61,13 +63,21 @@ public class CollectTasklet implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
         String dealYmd = resolveDealYmd();
-        List<String> lawdCodes = lawdCodeService.getAllLawdCodes();
+        CollectHistoryService.CollectInitResult init = collectHistoryService.init(dealYmd);
+        if (!init.shouldRun()) {
+            log.info("{}월 데이터 이미 수집 완료 - 스킵", dealYmd);
+            return RepeatStatus.FINISHED;
+        }
+
+        List<String> allLawdCodes = lawdCodeService.getAllLawdCodes();
+        List<String> lawdCodes = collectHistoryService.resolveTargetLawdCodes(dealYmd, allLawdCodes);
 
         log.info("[수집 시작] 대상월: {} | 법정동: {}개", dealYmd, lawdCodes.size());
 
         int totalCollected = 0;
         int totalSaved = 0;
         int processedCount = 0;
+        List<String> failedLawdCodes = new ArrayList<>();
 
         for (String lawdCd : lawdCodes) {
             try {
@@ -83,10 +93,12 @@ public class CollectTasklet implements Tasklet {
                 }
             } catch (Exception e) {
                 log.warn("법정동 {} 수집 실패: {}", lawdCd, e.getMessage());
+                failedLawdCodes.add(lawdCd);
             }
         }
 
         int duplicates = totalCollected - totalSaved;
+        collectHistoryService.finish(dealYmd, totalCollected, failedLawdCodes);
         log.info("[수집 완료] 법정동: {}개 | API 수집: {}건 | 저장: {}건 | 중복 스킵: {}건",
                 processedCount, totalCollected, totalSaved, duplicates);
 

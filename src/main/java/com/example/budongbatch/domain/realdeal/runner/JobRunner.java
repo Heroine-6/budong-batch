@@ -16,10 +16,16 @@ import java.time.LocalDate;
 
 /**
  * 커맨드라인 Job 실행기
- * 초기 적재/재인덱싱을 빠르게 실행하려고 만든 유틸성 런너
  *
- * 사용법:
- * Makefile
+ * 파라미터 우선순위 (수집 대상 월 결정):
+ * 1. dealYmd (직접 지정, 예: 202512)
+ * 2. runDate (날짜에서 추출, 예: 2025-12-01 → 202512)
+ * 3. 기본값: 전월
+ *
+ * 사용 예시:
+ * --batch.job.name=dealPipelineJob --batch.dealYmd=202512
+ * --batch.job.name=geocodeRetryJob
+ * --batch.job.name=reindexJob
  *
  * batch.job.name이 없으면 아무 Job도 실행하지 않음 (스케줄러만 동작)
  */
@@ -57,10 +63,17 @@ public class JobRunner implements ApplicationRunner {
 
             // dealYmd 직접 지정 시 추가 (예: 202512)
             if (dealYmd != null && !dealYmd.isBlank()) {
-                builder.addString("dealYmd", dealYmd);
-                log.info("Job 실행: {} (dealYmd: {})", jobName, dealYmd);
-            } else {
-                log.info("Job 실행: {} (runDate: {})", jobName, targetDate);
+                if (!isValidDealYmd(dealYmd)) {
+                    log.warn("dealYmd 형식 오류 (예: 202512): {} - 무시하고 runDate 사용", dealYmd);
+                } else {
+                    builder.addString("dealYmd", dealYmd);
+                    log.info("Job 실행: {} (dealYmd: {})", jobName, dealYmd);
+                }
+            }
+
+            if (dealYmd == null || dealYmd.isBlank() || !isValidDealYmd(dealYmd)) {
+                log.info("Job 실행: {} (runDate: {} → {}월)", jobName, targetDate,
+                        targetDate.getYear() + String.format("%02d", targetDate.getMonthValue()));
             }
 
             jobLauncher.run(job, builder.toJobParameters());
@@ -81,5 +94,16 @@ public class JobRunner implements ApplicationRunner {
             log.warn("runDate 파싱 실패, 오늘 날짜 사용: {}", runDate);
             return LocalDate.now();
         }
+    }
+
+    /**
+     * dealYmd 형식 검증 (YYYYMM, 예: 202512)
+     */
+    private boolean isValidDealYmd(String dealYmd) {
+        if (!dealYmd.matches("\\d{6}")) {
+            return false;
+        }
+        int month = Integer.parseInt(dealYmd.substring(4, 6));
+        return month >= 1 && month <= 12;
     }
 }
