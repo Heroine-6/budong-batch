@@ -17,6 +17,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * 수집 이력 관리 서비스
+ *
+ * 역할:
+ * - 월별 수집 상태 추적 (RUNNING/SUCCESS/FAILED)
+ * - 실패한 법정동 기록 및 재시도 지원
+ * - RUNNING 상태 타임아웃 처리
+ *
+ * 사용 흐름:
+ * 1. init() - 수집 시작 전 호출, 스킵/시작/재시도 결정
+ * 2. resolveTargetLawdCodes() - 수집 대상 법정동 결정 (전체 or 실패분만)
+ * 3. finish() - 수집 완료 후 호출, 결과 기록
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -26,6 +39,15 @@ public class CollectHistoryService {
     private final BatchDealCollectFailedLawdRepository failedLawdRepository;
     private final BatchProperties batchProperties;
 
+    /**
+     * 수집 초기화 - 실행 여부 결정
+     *
+     * @param dealYmd 수집 대상 월 (예: 202512)
+     * @return CollectInitResult
+     * - skip: SUCCESS 상태 → 수집 스킵
+     * - start: 신규 수집 시작
+     * - resume: FAILED/RUNNING 상태 → 재시도
+     */
     @Transactional
     public CollectInitResult init(String dealYmd) {
         LocalDateTime now = LocalDateTime.now();
@@ -54,6 +76,16 @@ public class CollectHistoryService {
         return CollectInitResult.start();
     }
 
+    /**
+     * 수집 대상 법정동 결정
+     *
+     * - 이전 실패 기록 있음 -> 실패한 법정동만 반환 (부분 재시도)
+     * - 실패 기록 없음 -> 전체 법정동 반환 (전체 수집)
+     *
+     * @param dealYmd 수집 대상 월
+     * @param allLawdCodes 전체 법정동 코드 목록
+     * @return 수집할 법정동 코드 목록
+     */
     @Transactional
     public List<String> resolveTargetLawdCodes(String dealYmd, List<String> allLawdCodes) {
         List<BatchDealCollectFailedLawd> failed = failedLawdRepository.findByDealYmd(dealYmd);
@@ -68,6 +100,16 @@ public class CollectHistoryService {
         return allLawdCodes;
     }
 
+    /**
+     * 수집 완료 처리
+     *
+     * - 실패 법정동 없음 -> SUCCESS
+     * - 실패 법정동 있음 -> FAILED + 실패 목록 저장 (다음 실행 시 재시도 대상)
+     *
+     * @param dealYmd 수집 대상 월
+     * @param collectedCount API에서 수집한 총 건수
+     * @param failedLawdCodes 수집 실패한 법정동 코드 목록
+     */
     @Transactional
     public void finish(String dealYmd, int collectedCount, List<String> failedLawdCodes) {
         CollectStatus status = failedLawdCodes.isEmpty() ? CollectStatus.SUCCESS : CollectStatus.FAILED;
@@ -85,15 +127,24 @@ public class CollectHistoryService {
         }
     }
 
+    /**
+     * 수집 초기화 결과
+     *
+     * @param shouldRun 수집 실행 여부
+     * @param resumed 재시도 여부 (true: 실패분 재시도, false: 신규 수집)
+     */
     public record CollectInitResult(boolean shouldRun, boolean resumed) {
+        /** SUCCESS 상태 - 수집 스킵 */
         public static CollectInitResult skip() {
             return new CollectInitResult(false, false);
         }
 
+        /** 신규 수집 시작 */
         public static CollectInitResult start() {
             return new CollectInitResult(true, false);
         }
 
+        /** FAILED/RUNNING 상태 - 재시도 */
         public static CollectInitResult resume() {
             return new CollectInitResult(true, true);
         }
