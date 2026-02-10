@@ -1,7 +1,7 @@
 version: "3.9"
 
 services:
-  chat:
+  batch:
     build: .
     container_name: batch
     ports:
@@ -12,5 +12,5 @@ services:
       - batch-network
 
 networks:
-  chat-network:
+  batch-network:
     driver: bridge
