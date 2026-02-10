@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  chat:
+    build: .
+    container_name: batch
+    ports:
+      - "8082:8080"
+    volumes:
+      - ./logging/logs:/app/logs
+    networks:
+      - batch-network
+
+networks:
+  chat-network:
+    driver: bridge

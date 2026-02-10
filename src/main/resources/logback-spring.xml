@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <springProperty scope="context"
+                    name="SLACK_WEBHOOK"
+                    source="logging.slack.webhook"/>
+
+    <property name="LOG_DIR" value="./logging/logs"/>
+
+
+    <appender name="FILE"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+        <file>${LOG_DIR}/application.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>
+                ${LOG_DIR}/application.%d{yyyy-MM-dd}.log
+            </fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>
+                {
+                "service":"batch",
+                "env":"dev"
+                }
+            </customFields>
+        </encoder>
+    </appender>
+
+    <turboFilter
+            class="com.example.budongbatch.logging.SlackDedupTurboFilter">
+        <!-- 같은 에러 30초 차단 -->
+        <suppressSeconds>30</suppressSeconds>
+    </turboFilter>
+
+    <appender name="SLACK"
+              class="com.github.maricn.logback.SlackAppender">
+
+        <webhookUri>${SLACK_WEBHOOK}</webhookUri>
+
+        <username>🚨 Chat Error Bot</username>
+        <iconEmoji>:rotating_light:</iconEmoji>
+
+        <!-- ERROR 이상만 Slack 전송 -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>🚑 ERROR 발생 확인이 필요합니다
+
+                • Service : chat
+                • Env     : dev
+                • Time    : %d{yyyy-MM-dd HH:mm:ss}
+
+                ━━━━━━━━━━━━━━━━━━━━
+                *Error 발생 위치*
+                %logger{50}
+
+                📩 *에러 메시지*
+                %msg
+
+                📌 *Exception*
+                %ex{3}
+            </pattern>
+        </layout>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="SLACK"/>
+    </root>
+
+</configuration>

@@ -70,3 +70,5 @@ logging:
     org.springframework.data.elasticsearch.client.WIRE: TRACE
     org.springframework.data.elasticsearch: DEBUG
     tracer: TRACE
+  slack:
+    webhook: ${SLACK_WEBHOOK_URL}
