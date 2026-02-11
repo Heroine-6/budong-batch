@@ -71,5 +71,4 @@ jobs:
         run: |
           sudo docker run --name batch-container -d \
             --env-file .env \
-            -p 8080:8080 \
             ${{ secrets.DOCKER_USERNAME }}/batch-container
