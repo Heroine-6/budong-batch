@@ -37,7 +37,7 @@ loki.process "app" {
 
   stage.timestamp {
     source = "@timestamp"
-    format = "RFC3339"
+    format = "RFC3339Nano"
   }
 
   stage.labels {
