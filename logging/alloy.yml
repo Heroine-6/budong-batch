@@ -1,0 +1,54 @@
+logging {
+  level = "info"
+}
+
+loki.write "default" {
+  endpoint {
+    url = env("LOKI_URL")
+  }
+}
+
+loki.source.file "app_logs" {
+  targets = [
+    {
+      __path__ = "/var/log/app/application.log",
+      service  = env("LOKI_SERVICE_NAME"),
+      env      = env("LOKI_ENV"),
+      server   = env("SERVER_NAME"),
+    },
+  ]
+  forward_to = [loki.process.app.receiver]
+}
+
+loki.process "app" {
+
+  stage.multiline {
+    firstline = "^{"
+  }
+
+  stage.json {
+    expressions = {
+      level      = "level",
+      logger     = "logger_name",
+      message    = "message",
+      timestamp  = "\"@timestamp\"",
+    }
+  }
+
+  stage.timestamp {
+    source = "@timestamp"
+    format = "RFC3339"
+  }
+
+  stage.labels {
+    values = {
+      level   = "level",
+      logger  = "logger",
+      server  = "server",
+      service = "service",
+      env     = "env",
+    }
+  }
+
+  forward_to = [loki.write.default.receiver]
+}
