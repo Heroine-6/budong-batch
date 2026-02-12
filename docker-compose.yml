@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   spring:
-    image: ${DOCKER_USERNAME}/chat-container:latest
+    image: ${DOCKER_USERNAME}/batch-container:latest
     ports:
       - "8080:8080"
     volumes:
