@@ -42,3 +42,7 @@ out/
 
 ###csv ###
 .csv
+
+### Logs ###
+logging/logs/*.log
+*.log
