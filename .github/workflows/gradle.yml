@@ -52,23 +52,16 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      - uses: actions/checkout@v3
+
       - name: Docker pull
         run: sudo docker pull ${{ secrets.DOCKER_USERNAME }}/batch-container
 
-      - name: Stop and remove existing containers
-        run: |
-          CONTAINER_IDS=$(sudo docker ps -aq --filter "name=batch-container")
-          if [ -n "$CONTAINER_IDS" ]; then
-            sudo docker stop $CONTAINER_IDS || true
-            sudo docker rm -f $CONTAINER_IDS || true
-          fi
-
       - name: Create .env file
-        run: |
-          echo "${{ secrets.APPLICATION }}" > .env
+        run: echo "${{ secrets.APPLICATION }}" > .env
 
-      - name: Run new container
-        run: |
-          sudo docker run --name batch-container -d \
-            --env-file .env \
-            ${{ secrets.DOCKER_USERNAME }}/batch-container
+      - name: Docker Compose Down
+        run: sudo docker-compose -p batch down
+
+      - name: Docker Compose Up
+        run: sudo docker-compose -p batch up -d

@@ -1,16 +1,24 @@
-name: batch
+version: "3.8"
+
 services:
+  spring:
+    image: ${DOCKER_USERNAME}/batch-container:latest
+    volumes:
+      - ./logs:/app/logs
+    env_file:
+      - .env
+    restart: unless-stopped
+
   alloy:
     image: grafana/alloy:latest
-    container_name: batch-alloy
     environment:
-      - LOKI_URL=http://loki:3100/loki/api/v1/push
+      - LOKI_URL=${LOKI_URL}
       - SERVER_NAME=batch
-      - LOKI_ENV=dev
+      - LOKI_ENV=${LOKI_ENV}
       - LOKI_SERVICE_NAME=batch
     volumes:
       - ./logs:/var/log/app
-      - ./alloy.yml:/etc/alloy/alloy.yml
+      - ./logging/alloy.yml:/etc/alloy/alloy.yml
     command: run /etc/alloy/alloy.yml
     restart: unless-stopped
 
