@@ -61,7 +61,7 @@ jobs:
         run: echo "${{ secrets.APPLICATION }}" > .env
 
       - name: Docker Compose Down
-        run: sudo docker-compose -p chat down
+        run: sudo docker-compose -p batch down
 
       - name: Docker Compose Up
-        run: sudo docker-compose -p chat up -d
+        run: sudo docker-compose -p batch up -d
