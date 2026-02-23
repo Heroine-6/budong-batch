@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  spring:
+    image: ${DOCKER_USERNAME}/batch-container:latest
+    volumes:
+      - ./logs:/app/logs
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  alloy:
+    image: grafana/alloy:latest
+    environment:
+      - LOKI_URL=${LOKI_URL}
+      - SERVER_NAME=batch
+      - LOKI_ENV=${LOKI_ENV}
+      - LOKI_SERVICE_NAME=batch
+    volumes:
+      - ./logs:/var/log/app
+      - ./logging/alloy.yml:/etc/alloy/alloy.yml
+    command: run /etc/alloy/alloy.yml
+    restart: unless-stopped
+
+networks:
+  default:
+    name: budong-network
+    external: true

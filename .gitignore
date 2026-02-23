@@ -38,6 +38,11 @@ out/
 
 ### env ###
 .env
+.env.prod
 
 ###csv ###
 .csv
+
+### Logs ###
+logging/logs/*.log
+*.log
